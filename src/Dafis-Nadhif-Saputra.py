@@ -53,8 +53,6 @@ class DataPreprocessor:
             'scaling_method': 'standard',  # 'standard', 'minmax', or None
             'handle_missing': 'mean',  # 'mean', 'median', 'mode', 'drop'
             'encode_categorical': True,
-            'remove_outliers': False,
-            'outlier_threshold': 3,  # IQR multiplier
             'test_size': 0.2,
             'random_state': 42
         }
@@ -185,37 +183,7 @@ class DataPreprocessor:
         
         return df
     
-    def remove_outliers(self, df, target_column=None):
-        """
-        Menghapus outliers menggunakan IQR method.
-        
-        Args:
-            df: DataFrame
-            target_column: Nama kolom target (tidak dihapus outliernya)
-        
-        Returns:
-            DataFrame tanpa outliers
-        """
-        logger.info("Removing outliers...")
-        df = df.copy()
-        initial_rows = len(df)
-        
-        numerical_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-        if target_column and target_column in numerical_cols:
-            numerical_cols.remove(target_column)
-        
-        threshold = self.config['outlier_threshold']
-        
-        for col in numerical_cols:
-            Q1 = df[col].quantile(0.25)
-            Q3 = df[col].quantile(0.75)
-            IQR = Q3 - Q1
-            lower_bound = Q1 - threshold * IQR
-            upper_bound = Q3 + threshold * IQR
-            df = df[(df[col] >= lower_bound) & (df[col] <= upper_bound)]
-        
-        logger.info(f"Removed {initial_rows - len(df)} outlier rows")
-        return df
+
     
     def scale_features(self, df, target_column=None):
         """
@@ -272,9 +240,7 @@ class DataPreprocessor:
         if self.config['encode_categorical']:
             df = self.encode_categorical_features(df, target_column)
         
-        # Step 3: Remove outliers (optional)
-        if self.config['remove_outliers']:
-            df = self.remove_outliers(df, target_column)
+
         
         # Step 4: Scale features
         if self.config['scaling_method']:
@@ -416,8 +382,7 @@ def main():
     parser.add_argument('--missing', type=str, default='mean',
                         choices=['mean', 'median', 'mode', 'drop'],
                         help='Metode handling missing values (default: mean)')
-    parser.add_argument('--remove-outliers', action='store_true',
-                        help='Hapus outliers dari data')
+
     
     args = parser.parse_args()
     
@@ -425,8 +390,6 @@ def main():
         'scaling_method': args.scaling if args.scaling != 'none' else None,
         'handle_missing': args.missing,
         'encode_categorical': True,
-        'remove_outliers': args.remove_outliers,
-        'outlier_threshold': 3,
         'test_size': 0.2,
         'random_state': 42
     }
