@@ -28,18 +28,9 @@ logger = logging.getLogger(__name__)
 
 
 class DataPreprocessor:
-    """
-    Class untuk melakukan preprocessing data secara otomatis.
-    Menghasilkan data yang siap untuk training model.
-    """
     
     def __init__(self, config=None):
-        """
-        Inisialisasi preprocessor dengan konfigurasi.
-        
-        Args:
-            config: Dictionary konfigurasi preprocessing
-        """
+
         self.config = config or self._default_config()
         self.scaler = None
         self.label_encoders = {}
@@ -58,15 +49,7 @@ class DataPreprocessor:
         }
     
     def load_data(self, file_path):
-        """
-        Memuat data dari file.
-        
-        Args:
-            file_path: Path ke file data (CSV, Excel, dll)
-        
-        Returns:
-            DataFrame
-        """
+        """Load data from file (CSV, Excel, JSON, Parquet)."""
         logger.info(f"Loading data from: {file_path}")
         
         file_extension = os.path.splitext(file_path)[1].lower()
@@ -86,15 +69,7 @@ class DataPreprocessor:
         return df
     
     def explore_data(self, df):
-        """
-        Eksplorasi data untuk memahami struktur dan kualitas data.
-        
-        Args:
-            df: DataFrame
-        
-        Returns:
-            Dictionary berisi hasil eksplorasi
-        """
+        """Perform basic data exploration."""
         logger.info("Exploring data...")
         
         exploration = {
@@ -115,15 +90,7 @@ class DataPreprocessor:
         return exploration
     
     def handle_missing_values(self, df):
-        """
-        Menangani missing values.
-        
-        Args:
-            df: DataFrame
-        
-        Returns:
-            DataFrame dengan missing values yang sudah ditangani
-        """
+        """Handle missing values based on configuration."""
         logger.info("Handling missing values...")
         df = df.copy()
         
@@ -156,16 +123,7 @@ class DataPreprocessor:
         return df
     
     def encode_categorical_features(self, df, target_column=None):
-        """
-        Encoding fitur kategorikal.
-        
-        Args:
-            df: DataFrame
-            target_column: Nama kolom target (tidak di-encode jika diberikan)
-        
-        Returns:
-            DataFrame dengan fitur kategorikal yang ter-encode
-        """
+        """Encode categorical features using LabelEncoder."""
         logger.info("Encoding categorical features...")
         df = df.copy()
         
@@ -186,16 +144,7 @@ class DataPreprocessor:
 
     
     def scale_features(self, df, target_column=None):
-        """
-        Scaling fitur numerik.
-        
-        Args:
-            df: DataFrame
-            target_column: Nama kolom target (tidak di-scale)
-        
-        Returns:
-            DataFrame dengan fitur yang sudah di-scale
-        """
+        """Scale numerical features."""
         logger.info(f"Scaling features using {self.config['scaling_method']} method...")
         df = df.copy()
         
@@ -217,16 +166,7 @@ class DataPreprocessor:
         return df
     
     def preprocess(self, df, target_column):
-        """
-        Pipeline preprocessing lengkap.
-        
-        Args:
-            df: DataFrame
-            target_column: Nama kolom target
-        
-        Returns:
-            DataFrame yang sudah dipreprocess
-        """
+        """Run the full preprocessing pipeline."""
         logger.info("=" * 50)
         logger.info("Starting preprocessing pipeline...")
         logger.info("=" * 50)
@@ -253,16 +193,7 @@ class DataPreprocessor:
         return df
     
     def get_train_test_split(self, df, target_column):
-        """
-        Split data menjadi training dan testing sets.
-        
-        Args:
-            df: DataFrame yang sudah dipreprocess
-            target_column: Nama kolom target
-        
-        Returns:
-            X_train, X_test, y_train, y_test
-        """
+        """Split data into train and test sets."""
         X = df.drop(columns=[target_column])
         y = df[target_column]
         
@@ -285,23 +216,12 @@ class DataPreprocessor:
         return X_train, X_test, y_train, y_test
     
     def save_preprocessed_data(self, df, output_path):
-        """
-        Menyimpan data yang sudah dipreprocess.
-        
-        Args:
-            df: DataFrame yang sudah dipreprocess
-            output_path: Path untuk menyimpan file
-        """
+
         df.to_csv(output_path, index=False)
         logger.info(f"Preprocessed data saved to: {output_path}")
     
     def save_artifacts(self, output_dir):
-        """
-        Menyimpan artifacts preprocessing (scaler, encoders, dll).
-        
-        Args:
-            output_dir: Directory untuk menyimpan artifacts
-        """
+
         os.makedirs(output_dir, exist_ok=True)
         
         if self.scaler:
@@ -326,18 +246,7 @@ class DataPreprocessor:
 
 
 def preprocess_data(input_path, output_path, target_column, config=None):
-    """
-    Fungsi utama untuk preprocessing data dari input ke output.
-    
-    Args:
-        input_path: Path ke file input
-        output_path: Path untuk menyimpan hasil
-        target_column: Nama kolom target
-        config: Konfigurasi preprocessing (optional)
-    
-    Returns:
-        X_train, X_test, y_train, y_test - Data siap latih
-    """
+    """Main wrapper function for preprocessing."""
     preprocessor = DataPreprocessor(config)
     
     # Load data
